@@ -1,24 +1,20 @@
 import { test, expect } from "@playwright/test";
+import { LoginPage } from "./pageobjects/login";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("https://www.saucedemo.com/");
+  const loginPage = new LoginPage(page);
+  await loginPage.goto();
 });
 
-test("can login with valid cridentials", async ({ page }) => {
-  await page.locator('[data-test="username"]').click();
-  await page.locator('[data-test="username"]').fill("standard_user");
-  await page.locator('[data-test="password"]').click();
-  await page.locator('[data-test="password"]').fill("secret_sauce");
-  await page.locator('[data-test="login-button"]').click();
+test("can login with valid credentials", async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  await loginPage.logIn("standard_user", "secret_sauce");
   expect(page.url()).toContain("inventory.html");
 });
 
 test("can't login with invalid password", async ({ page }) => {
-  await page.locator('[data-test="username"]').click();
-  await page.locator('[data-test="username"]').fill("standard_user");
-  await page.locator('[data-test="password"]').click();
-  await page.locator('[data-test="password"]').fill("asd");
-  await page.locator('[data-test="login-button"]').click();
-  await expect(page.locator('[data-test="error"]')).toBeVisible();
+  const loginPage = new LoginPage(page);
+  await loginPage.logIn("standard_user", "asd");
+  expect(await loginPage.isErrorMessageVisible()).toBeTruthy();
   expect(page.url()).not.toContain("inventory.html");
 });
